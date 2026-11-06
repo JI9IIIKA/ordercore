@@ -1,0 +1,6 @@
+Standalone module: build PASS; vet PASS; unit tests PASS.
+API/SQL on PGlite, single connection:
+=== RUN   TestOrderCore
+--- PASS: TestOrderCore (0.03s)
+PASS
+ok  	ordercore/tests	0.036s

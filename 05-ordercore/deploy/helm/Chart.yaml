@@ -1,0 +1,5 @@
+apiVersion: v2
+name: go-portfolio
+version: 0.1.0
+appVersion: "0.1.0"
+description: Deploy one Go portfolio service with external managed dependencies

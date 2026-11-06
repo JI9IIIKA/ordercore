@@ -1,0 +1,111 @@
+name: ordercore
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: portfolio
+      POSTGRES_USER: portfolio
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-portfolio-local-only}
+    volumes:
+    - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U portfolio -d portfolio
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  redis:
+    image: redis:7.4-alpine
+    command:
+    - redis-server
+    - --appendonly
+    - 'yes'
+    volumes:
+    - redis_data:/data
+    healthcheck:
+      test:
+      - CMD
+      - redis-cli
+      - ping
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  app:
+    build:
+      context: .
+      args:
+        PROJECT: ${PROJECT:-ordercore}
+    environment:
+      DATABASE_URL: postgres://portfolio:${POSTGRES_PASSWORD:-portfolio-local-only}@postgres:5432/portfolio?sslmode=disable
+      API_KEYS_JSON: ${API_KEYS_JSON:?Run python3 scripts/setup.py first}
+      REDIS_URL: redis://redis:6379/0
+      BROKER: ${BROKER:-}
+      RABBITMQ_URL: amqp://portfolio:${RABBITMQ_PASSWORD:-portfolio-local-only}@rabbitmq:5672/
+      KAFKA_ADDR: kafka:9092
+      CLICKHOUSE_URL: ${CLICKHOUSE_URL:-}
+      CLICKHOUSE_USER: portfolio
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-portfolio-local-only}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:?Run python3 scripts/setup.py first}
+      AI_URL: ${AI_URL:-}
+      AI_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:?Run python3 scripts/setup.py first}
+      GRPC_ADDR: :9090
+    ports:
+    - 127.0.0.1:${PORT:-8084}:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+  eventconsumer:
+    profiles:
+    - consumer
+    build:
+      context: .
+      args:
+        PROJECT: eventconsumer
+    environment:
+      PROJECT: ${PROJECT:-ordercore}
+      DATABASE_URL: postgres://portfolio:${POSTGRES_PASSWORD:-portfolio-local-only}@postgres:5432/portfolio?sslmode=disable
+      BROKER: ${BROKER:-rabbitmq}
+      RABBITMQ_URL: amqp://portfolio:${RABBITMQ_PASSWORD:-portfolio-local-only}@rabbitmq:5672/
+      KAFKA_ADDR: kafka:9092
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+  rabbitmq:
+    profiles:
+    - rabbit
+    image: rabbitmq:4-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: portfolio
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-portfolio-local-only}
+    volumes:
+    - rabbit_data:/var/lib/rabbitmq
+  kafka:
+    profiles:
+    - kafka
+    image: apache/kafka:3.9.0
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+    volumes:
+    - kafka_data:/tmp/kraft-combined-logs
+volumes:
+  postgres_data: null
+  redis_data: null
+  rabbit_data: null
+  kafka_data: null
+  clickhouse_data: null

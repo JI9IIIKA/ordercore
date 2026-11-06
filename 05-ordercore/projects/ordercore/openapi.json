@@ -1,0 +1,432 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "OrderCore",
+    "version": "0.1.0",
+    "description": "Заказы и складские остатки; request examples and route contract. Exact required fields and invariants are validated by Go handlers."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8084"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "paths": {
+    "/products": {
+      "post": {
+        "operationId": "ordercore_post_products",
+        "summary": "POST /products",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found or transition not applicable"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "413": {
+            "description": "Body exceeds 1 MiB"
+          },
+          "429": {
+            "description": "Rate limit"
+          },
+          "500": {
+            "description": "Internal error"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "price_cents": {
+                    "type": "integer"
+                  },
+                  "stock": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "name": "Клавиатура",
+                "price_cents": 10000,
+                "stock": 5
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "ordercore_get_products",
+        "summary": "GET /products",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found or transition not applicable"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "413": {
+            "description": "Body exceeds 1 MiB"
+          },
+          "429": {
+            "description": "Rate limit"
+          },
+          "500": {
+            "description": "Internal error"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        }
+      }
+    },
+    "/orders": {
+      "post": {
+        "operationId": "ordercore_post_orders",
+        "summary": "POST /orders",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found or transition not applicable"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "413": {
+            "description": "Body exceeds 1 MiB"
+          },
+          "429": {
+            "description": "Rate limit"
+          },
+          "500": {
+            "description": "Internal error"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "product_id": {
+                          "type": "string"
+                        },
+                        "quantity": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "items": [
+                  {
+                    "product_id": "PRODUCT_ID",
+                    "quantity": 1
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{id}": {
+      "get": {
+        "operationId": "ordercore_get_orders_id",
+        "summary": "GET /orders/{id}",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found or transition not applicable"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "413": {
+            "description": "Body exceeds 1 MiB"
+          },
+          "429": {
+            "description": "Rate limit"
+          },
+          "500": {
+            "description": "Internal error"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        }
+      }
+    },
+    "/orders/{id}/cancel": {
+      "post": {
+        "operationId": "ordercore_post_orders_id_cancel",
+        "summary": "POST /orders/{id}/cancel",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found or transition not applicable"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "413": {
+            "description": "Body exceeds 1 MiB"
+          },
+          "429": {
+            "description": "Rate limit"
+          },
+          "500": {
+            "description": "Internal error"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        }
+      }
+    },
+    "/orders/{id}/payment": {
+      "post": {
+        "operationId": "ordercore_post_orders_id_payment",
+        "summary": "POST /orders/{id}/payment",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found or transition not applicable"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "413": {
+            "description": "Body exceeds 1 MiB"
+          },
+          "429": {
+            "description": "Rate limit"
+          },
+          "500": {
+            "description": "Internal error"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "event_id": {
+                    "type": "string"
+                  },
+                  "outcome": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "event_id": "payment-1",
+                "outcome": "success"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

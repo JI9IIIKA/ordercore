@@ -1,0 +1,13 @@
+project: ordercore
+replicas: 2
+image:
+  repository: go-portfolio/ordercore
+  tag: local
+  pullPolicy: IfNotPresent
+# Existing Secret: DATABASE_URL, API_KEYS_JSON, WEBHOOK_SECRET, AI_SERVICE_TOKEN.
+# Optional keys: REDIS_URL, BROKER, RABBITMQ_URL, KAFKA_ADDR, CLICKHOUSE_URL,
+# CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, AI_URL.
+secretName: portfolio-runtime
+resources:
+  requests: {cpu: 100m, memory: 128Mi}
+  limits: {cpu: "1", memory: 512Mi}
